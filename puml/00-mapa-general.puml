@@ -1,0 +1,66 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title HydroSmart · mapa de bases
+entity "Identidad\nhs_identity" as iam {
+  user
+  account
+  session
+}
+entity "Propiedades\nhs_properties" as props {
+  properties
+  units
+  devices
+  tenancies
+}
+entity "Telemetría\nhs_telemetry" as telemetry {
+  readings
+}
+entity "Analítica\nhs_analytics" as analytics {
+  unit_daily_consumption
+  savings_goals
+  alerts
+  tariff_versions
+}
+entity "Reportes\nhs_reports" as reports {
+  report_jobs
+  report_artifacts
+}
+entity "Notificaciones\nhs_notifications" as notifications {
+  notifications
+  notification_preferences
+  push_deliveries
+}
+entity "Planes y pagos\nhs_billing" as billing {
+  plans
+  memberships
+  payment_orders
+}
+iam .right.> props
+props .right.> telemetry
+telemetry .down.> analytics : lectura
+props .down.> reports : unidad
+props .down.> billing : factura
+iam .down.> billing : membresía
+iam .down.> notifications : destinatario
+legend bottom
+Las flechas van del origen del dato al servicio que usa su ID.
+endlegend
+@enduml

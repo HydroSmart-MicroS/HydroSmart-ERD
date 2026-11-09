@@ -1,0 +1,89 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Control de migraciones
+entity "hs_analytics.schema_migrations" as n_analytics_schema_migrations {
+  * version : text <<PK>>
+  --
+  * checksum : text
+  * applied_at : timestamptz
+}
+entity "hs_properties.flyway_schema_history" as n_properties_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "hs_reports.flyway_schema_history" as n_reports_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "hs_notifications.flyway_schema_history" as n_notifications_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "hs_billing.flyway_schema_history" as n_billing_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+n_properties_flyway_schema_history -[hidden]right-> n_reports_flyway_schema_history
+n_reports_flyway_schema_history -[hidden]right-> n_notifications_flyway_schema_history
+n_billing_flyway_schema_history -[hidden]right-> n_analytics_schema_migrations
+n_properties_flyway_schema_history -[hidden]down-> n_billing_flyway_schema_history
+n_reports_flyway_schema_history -[hidden]down-> n_analytics_schema_migrations
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

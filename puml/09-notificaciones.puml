@@ -1,0 +1,78 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Avisos, preferencias y Web Push
+entity "notifications" as n_notifications_notifications {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * source_event_id : uuid
+  * channel : text
+  * title : text
+  * body : text
+  * status : text
+  * created_at : timestamptz
+    read_at : timestamptz
+    sent_at : timestamptz
+  * kind : text
+  * attempts : integer
+    last_error : text
+    provider_message_id : text
+  * data : jsonb
+}
+entity "push_deliveries" as n_notifications_push_deliveries {
+  * notification_id : uuid <<PK, FK>>
+  * token_id : uuid <<PK, FK>>
+  --
+  * delivered_at : timestamptz
+}
+entity "push_tokens" as n_notifications_push_tokens {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * token : text <<UK>>
+  * created_at : timestamptz
+    revoked_at : timestamptz
+    p256dh : text
+    auth_secret : text
+}
+entity "notification_preferences" as n_notifications_notification_preferences {
+  * user_id : text <<PK, REF>>
+  --
+  * high_consumption_enabled : boolean
+  * leak_alerts_enabled : boolean
+  * summaries_enabled : boolean
+  * timezone : text
+    quiet_start : time
+    quiet_end : time
+  * updated_at : timestamptz
+  * email_enabled : boolean
+  * in_app_enabled : boolean
+  * goal_enabled : boolean
+}
+n_notifications_notifications ||--o{ n_notifications_push_deliveries : notification_id
+n_notifications_push_tokens ||--o{ n_notifications_push_deliveries : token_id
+n_notifications_notifications -[hidden]right-> n_notifications_push_tokens
+n_notifications_push_tokens -[hidden]right-> n_notifications_notification_preferences
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

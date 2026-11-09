@@ -1,0 +1,87 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Planes, membresías y órdenes
+entity "plans" as n_billing_plans {
+  * code : text <<PK>>
+  --
+  * currency : character(3)
+  * min_price_minor : integer
+  * max_price_minor : integer
+    configured_price_minor : integer
+    billing_interval : text
+    stripe_price_id : text <<UK>>
+  * device_limit : integer
+}
+entity "memberships" as n_billing_memberships {
+  * user_id : text <<PK, REF>>
+  --
+  * plan_code : text <<FK>>
+  * paid_through : timestamptz
+  * last_payment_id : uuid <<FK>>
+  * updated_at : timestamptz
+  * cancel_at_period_end : boolean
+    cancellation_requested_at : timestamptz
+}
+entity "payment_orders" as n_billing_payment_orders {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * kind : text
+    plan_code : text <<FK>>
+    unit_id : uuid <<REF>>
+    invoice_month : date
+  * amount_minor : integer
+  * currency : text
+  * status : text
+    provider_session_id : text <<UK>>
+    checkout_url : text
+    verification_token : text
+  * created_at : timestamptz
+    paid_at : timestamptz
+  * next_check_at : timestamptz
+    cancelled_at : timestamptz
+}
+entity "subscriptions" as n_billing_subscriptions {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<FK>>
+  * plan_code : text <<FK>>
+  * stripe_subscription_id : text <<UK>>
+  * status : text
+    current_period_end : timestamptz
+  * updated_at : timestamptz
+}
+entity "billing_customers" as n_billing_billing_customers {
+  * user_id : text <<PK, REF>>
+  --
+  * stripe_customer_id : text <<UK>>
+}
+n_billing_payment_orders ||--o{ n_billing_memberships : last_payment_id
+n_billing_plans ||--o{ n_billing_memberships : plan_code
+n_billing_plans |o--o{ n_billing_payment_orders : plan_code
+n_billing_plans ||--o{ n_billing_subscriptions : plan_code
+n_billing_billing_customers ||--o{ n_billing_subscriptions : user_id
+
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

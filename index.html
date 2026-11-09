@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HydroSmart · ERD en PlantUML</title>
+<style>
+:root{color-scheme:light;--page:#f1f6f5;--paper:#fff;--ink:#15383b;--muted:#416466;--line:#c9ddda;--accent:#145c55}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.5 "Segoe UI",Arial,sans-serif}
+main{max-width:1120px;margin:auto;padding:34px 24px 48px}
+header{padding:3px 0 20px}
+.eyebrow{font-size:.8rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:clamp(1.9rem,4vw,2.7rem);line-height:1.1;margin:6px 0 10px}
+p{margin:8px 0}
+.lede,.meta{color:var(--muted)}
+.toolbar{display:flex;gap:12px;justify-content:space-between;align-items:end;flex-wrap:wrap;padding:16px;background:var(--paper);border:1px solid var(--line);border-radius:12px}
+.toolbar label{display:block;font-size:.85rem;font-weight:650;margin-bottom:4px}
+select{width:min(330px,100%);min-height:44px;background:#f9fdfc;color:var(--ink);font:inherit;padding:6px 12px;border:1px solid #729692;border-radius:7px}
+.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.controls a,.controls button{display:inline-flex;min-height:42px;align-items:center;padding:8px 11px;border:1px solid var(--line);border-radius:7px;color:var(--accent);font-weight:650;text-decoration:none}
+.controls button{font:inherit;cursor:pointer;background:var(--accent);color:#fff;border-color:var(--accent)}
+.controls a:hover{background:#e9f6f2}
+.controls button:disabled{opacity:.65;cursor:default}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid #24776e;outline-offset:3px}
+.details-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:22px 0 6px}
+h2{margin:0;font-size:1.3rem}
+details{margin-top:18px;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:12px 16px}
+summary{font-weight:650;cursor:pointer}
+figure{margin:0}
+.zoom-row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:10px 0;font-size:.89rem;color:var(--muted)}
+.zoom-row label{display:inline-flex;gap:7px;align-items:center}
+.zoom-row[hidden]{display:none}
+.diagram{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px}
+.diagram img{display:block;margin:auto;max-width:none}
+.diagram.fit img{max-width:100%;height:auto}
+.diagram.full{position:relative;height:clamp(300px,65vh,680px);cursor:grab;overscroll-behavior:contain}
+.diagram.full img{margin:0;max-width:none;user-select:none;-webkit-user-drag:none}
+.diagram.full.dragging{cursor:grabbing}
+#zoom-controls:not([hidden]){display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#zoom-controls button{font:inherit;min-width:42px;min-height:36px;padding:3px 9px;background:#fff;color:var(--ink);border:1px solid #729692;border-radius:6px;cursor:pointer}
+#zoom-controls output{min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
+#zoom-controls button:disabled{opacity:.5;cursor:default}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin-top:12px}
+th,td{text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:8px}
+code{overflow-wrap:anywhere;color:#234746}
+footer{margin-top:20px;font-size:.88rem;color:var(--muted)}
+@media(max-width:600px){main{padding:22px 14px 34px}.toolbar>div:first-child{width:100%}select{width:100%}.details-head{align-items:start}.diagram img{margin:0}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">HydroSmart · modelo de datos</div>
+<h1>ERD en PlantUML</h1>
+<p class="lede">15 láminas · 58 tablas SQL · 365 columnas · 18 claves foráneas</p>
+</header>
+<div class="toolbar">
+  <div><label for="sheet">Elegir lámina</label><select id="sheet"><option value="00-mapa-general">Mapa general de las bases</option>
+<option value="14-erd-completo">ERD completo con zoom</option>
+<option value="01-identidad">Identidad y acceso</option>
+<option value="02-propiedades">Propiedades, unidades y medidores</option>
+<option value="03-telemetria">Lecturas y telemetría</option>
+<option value="04-consumo">Consumo y deduplicación de lecturas</option>
+<option value="05-alertas">Reglas, alertas y presencia</option>
+<option value="06-metas">Metas y recomendaciones</option>
+<option value="07-tarifas">Tarifas, tramos y vigencias</option>
+<option value="08-reportes">Reportes y archivos</option>
+<option value="09-notificaciones">Avisos, preferencias y Web Push</option>
+<option value="10-pagos">Planes, membresías y órdenes</option>
+<option value="11-eventos">Eventos y deduplicación</option>
+<option value="12-privacidad">Privacidad y eliminación</option>
+<option value="13-migraciones">Control de migraciones</option></select></div>
+  <div class="controls">
+    <button id="open-full" type="button">Ver ERD completo</button>
+    <a id="open-svg" href="svg/00-mapa-general.svg" target="_blank" rel="noopener">Abrir SVG</a>
+    <a id="source" href="puml/00-mapa-general.puml" download>Descargar .puml</a>
+    <a href="er-model.json" download>Catálogo JSON</a>
+  </div>
+</div>
+<div class="details-head"><h2 id="title">Mapa general de las bases</h2><span id="db" class="meta">HydroSmart MAIN</span></div>
+<p id="note" class="meta"></p>
+<figure>
+<div class="zoom-row" id="small-controls"><span>Tamaño natural para leer las columnas</span><label><input id="fit" type="checkbox"> Ajustar al ancho</label></div>
+<div class="zoom-row" id="full-controls" hidden>
+  <div id="zoom-controls">
+    <button id="zoom-fit" type="button">Ajustar</button>
+    <button id="zoom-out" type="button" aria-label="Reducir zoom">−</button>
+    <output id="zoom-level" aria-live="polite">100%</output>
+    <button id="zoom-in" type="button" aria-label="Aumentar zoom">+</button>
+    <button id="zoom-actual" type="button">100%</button>
+  </div>
+  <span>Arrastra para moverte · Ctrl + rueda para ampliar</span>
+</div>
+<div class="diagram" id="diagram" tabindex="0" aria-label="Diagrama, usa las barras o las flechas para desplazarte"><img id="preview" src="svg/00-mapa-general.svg" width="637" height="387" alt="Mapa general de las bases de HydroSmart"></div>
+</figure>
+<details id="relations" hidden>
+<summary id="ref-count">Referencias lógicas de la lámina</summary>
+<div class="table-wrap"><table><thead><tr><th>Campo</th><th>Identificador de origen</th><th>Uso</th></tr></thead><tbody id="references"></tbody></table></div>
+</details>
+<footer>Esquema de MAIN verificado el 8 de noviembre de 2026. El catálogo JSON conserva tipos SQL completos, restricciones, índices y validadores.</footer>
+</main>
+<script>
+const sheets=[{"slug":"00-mapa-general","name":"Mapa general de las bases","db":"HydroSmart MAIN","note":"El mapa resume las dependencias entre bases. El selector permite revisar cada conjunto de entidades a tamaño legible.","refs":[],"width":637,"height":387},{"slug":"14-erd-completo","name":"ERD completo con zoom","db":"Las siete bases de HydroSmart MAIN","note":"Incluye las 58 tablas SQL, las 365 columnas, las 18 FK, las 42 referencias lógicas y el modelo de MongoDB. Las cajas sin enlaces conservan su estructura independiente en el esquema levantado.","refs":[{"column":"hs_properties.public.properties.owner_user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_properties.public.tenancies.tenant_user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_telemetry.readings.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_telemetry.readings.device_id","target":"hs_properties.public.devices.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.savings_goals.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alert_rules.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alert_rules.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.alerts.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alerts.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alerts.device_id","target":"hs_properties.public.devices.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.unit_daily_consumption.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.recommendations.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.recommendations.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_reports.public.report_jobs.requested_by_user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_reports.public.report_jobs.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_notifications.public.notification_preferences.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_notifications.public.push_tokens.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_notifications.public.notifications.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.billing_customers.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.processed_readings.reading_id","target":"hs_telemetry.readings._id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.unit_tariffs.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.tariff_versions.owner_user_id","target":"hs_identity.public.user.id","nullable":true,"description":"Columna nullable."},{"column":"hs_identity.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.memberships.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.payment_orders.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.payment_orders.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.savings_goals.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.alert_samples.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alert_samples.device_id","target":"hs_properties.public.devices.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.unit_tariff_periods.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.device_presence.device_id","target":"hs_properties.public.devices.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.device_presence.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_identity.public.account_deletions.user_id","target":"hs_identity.public.user.id","nullable":true,"description":"Puede quedar vacío después del borrado."},{"column":"hs_analytics.public.alert_samples.reading_id","target":"hs_telemetry.readings._id","nullable":false,"description":"Identidad de la lectura evaluada."},{"column":"hs_analytics.public.processed_events.event_id","target":"hs_telemetry.readings.event.event_id","nullable":false,"description":"UUID del evento de lectura que consume Analytics."},{"column":"hs_reports.public.report_jobs.request_event_id","target":"hs_reports.public.outbox_events.event_id","nullable":true,"description":"Identificador del intento de generación vigente."},{"column":"hs_reports.public.outbox_events.aggregate_id","target":"hs_reports.public.report_jobs.id","nullable":false,"description":"Para eventos del ciclo de vida del reporte. El UUID se almacena como texto."},{"column":"hs_billing.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","nullable":false,"description":"Para eventos de facturación emitidos por cuenta."},{"column":"hs_notifications.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","nullable":false,"description":"Para solicitudes de entrega emitidas por cuenta."},{"column":"hs_identity.public.account_deletions.unit_ids","target":"hs_properties.public.units.id","description":"Lista JSON de identificadores en una tarea de eliminación."},{"column":"hs_analytics.public.outbox_events.aggregate_id","target":"hs_properties.public.units.id","description":"En analytics.consumption.updated.v1 identifica la unidad."},{"column":"hs_analytics.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","description":"En eventos de monitoreo emitidos por usuario identifica la cuenta."}],"full":true,"width":8573,"height":1877},{"slug":"01-identidad","name":"Identidad y acceso","db":"hs_identity","note":"account.userId y session.userId sí tienen FK a user.id. verification guarda verificaciones temporales por identifier. jwks guarda claves de firma compartidas por el servicio. Ambas tablas tienen PK propia y carecen de FK a user.","refs":[],"width":676,"height":605},{"slug":"02-propiedades","name":"Propiedades, unidades y medidores","db":"hs_properties","note":"Cada unidad admite como máximo un alquiler activo. El índice parcial de tenancies conserva el historial.","refs":[{"column":"hs_properties.public.properties.owner_user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_properties.public.tenancies.tenant_user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."}],"width":570,"height":623},{"slug":"03-telemetria","name":"Lecturas y telemetría","db":"hs_telemetry","note":"event se guarda dentro de readings. erased_units es una colección prevista que se materializa con el primer borrado de una unidad.","refs":[{"column":"hs_telemetry.readings.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_telemetry.readings.device_id","target":"hs_properties.public.devices.id","nullable":false,"description":"Referencia por ID."}],"width":402,"height":457},{"slug":"04-consumo","name":"Consumo y deduplicación de lecturas","db":"hs_analytics","note":"","refs":[{"column":"hs_analytics.public.unit_daily_consumption.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.processed_readings.reading_id","target":"hs_telemetry.readings._id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.processed_events.event_id","target":"hs_telemetry.readings.event.event_id","nullable":false,"description":"UUID del evento de lectura que consume Analytics."}],"width":570,"height":387},{"slug":"05-alertas","name":"Reglas, alertas y presencia","db":"hs_analytics","note":"","refs":[{"column":"hs_analytics.public.alert_rules.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alert_rules.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.alerts.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alerts.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alerts.device_id","target":"hs_properties.public.devices.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.alert_samples.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alert_samples.device_id","target":"hs_properties.public.devices.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.device_presence.device_id","target":"hs_properties.public.devices.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.device_presence.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.alert_samples.reading_id","target":"hs_telemetry.readings._id","nullable":false,"description":"Identidad de la lectura evaluada."}],"width":690,"height":559},{"slug":"06-metas","name":"Metas y recomendaciones","db":"hs_analytics","note":"","refs":[{"column":"hs_analytics.public.savings_goals.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.recommendations.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.recommendations.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.savings_goals.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."}],"width":570,"height":291},{"slug":"07-tarifas","name":"Tarifas, tramos y vigencias","db":"hs_analytics","note":"","refs":[{"column":"hs_analytics.public.unit_tariffs.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_analytics.public.tariff_versions.owner_user_id","target":"hs_identity.public.user.id","nullable":true,"description":"Columna nullable."},{"column":"hs_analytics.public.unit_tariff_periods.unit_id","target":"hs_properties.public.units.id","nullable":false,"description":"Referencia por ID."}],"width":707,"height":512},{"slug":"08-reportes","name":"Reportes y archivos","db":"hs_reports","note":"report_artifacts.report_id es PK y FK. Cada solicitud puede tener cero o un archivo.","refs":[{"column":"hs_reports.public.report_jobs.requested_by_user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_reports.public.report_jobs.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."},{"column":"hs_reports.public.report_jobs.request_event_id","target":"hs_reports.public.outbox_events.event_id","nullable":true,"description":"Identificador del intento de generación vigente."},{"column":"hs_reports.public.outbox_events.aggregate_id","target":"hs_reports.public.report_jobs.id","nullable":false,"description":"Para eventos del ciclo de vida del reporte. El UUID se almacena como texto."}],"width":570,"height":717},{"slug":"09-notificaciones","name":"Avisos, preferencias y Web Push","db":"hs_notifications","note":"","refs":[{"column":"hs_notifications.public.notification_preferences.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_notifications.public.push_tokens.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_notifications.public.notifications.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."}],"width":706,"height":543},{"slug":"10-pagos","name":"Planes, membresías y órdenes","db":"hs_billing","note":"payment_orders registra órdenes de plan y de agua. plan_code se usa en las órdenes de plan. unit_id e invoice_month identifican las órdenes de agua.","refs":[{"column":"hs_billing.public.billing_customers.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.memberships.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.payment_orders.user_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.payment_orders.unit_id","target":"hs_properties.public.units.id","nullable":true,"description":"Columna nullable."}],"width":617,"height":843},{"slug":"11-eventos","name":"Eventos y deduplicación","db":"Tablas técnicas · varios servicios","note":"Cada servicio guarda y deduplica sus eventos en sus propias tablas.","refs":[{"column":"hs_identity.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","nullable":false,"description":"Referencia por ID."},{"column":"hs_billing.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","nullable":false,"description":"Para eventos de facturación emitidos por cuenta."},{"column":"hs_notifications.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","nullable":false,"description":"Para solicitudes de entrega emitidas por cuenta."},{"column":"hs_analytics.public.outbox_events.aggregate_id","target":"hs_properties.public.units.id","description":"En analytics.consumption.updated.v1 identifica la unidad."},{"column":"hs_analytics.public.outbox_events.aggregate_id","target":"hs_identity.public.user.id","description":"En eventos de monitoreo emitidos por usuario identifica la cuenta."}],"width":734,"height":766},{"slug":"12-privacidad","name":"Privacidad y eliminación","db":"Tablas técnicas · varios servicios","note":"El archivo anónimo de pagos tiene su propio identificador. Los recibos y marcadores de borrado se identifican por hash.","refs":[{"column":"hs_identity.public.account_deletions.user_id","target":"hs_identity.public.user.id","nullable":true,"description":"Puede quedar vacío después del borrado."},{"column":"hs_identity.public.account_deletions.unit_ids","target":"hs_properties.public.units.id","description":"Lista JSON de identificadores en una tarea de eliminación."}],"width":708,"height":608},{"slug":"13-migraciones","name":"Control de migraciones","db":"Tablas técnicas · varios servicios","note":"Cada historial registra las migraciones de su propia base. Estas cinco tablas tienen PK propia y carecen de claves foráneas entre sí y hacia las tablas de negocio.","refs":[],"width":848,"height":574}];
+const byId=id=>document.getElementById(id);
+const pick=byId('sheet');
+const diagram=byId('diagram');
+const preview=byId('preview');
+const relations=byId('relations');
+const references=byId('references');
+let sheet=sheets[0];
+let scale=1;
+let drag=null;
+const minScale=.02,maxScale=3;
+const padding=24;
+function visibleAnchor(position,start,size,viewport){
+ const first=Math.max(0,start), last=Math.min(viewport,start+size);
+ return Math.max(first,Math.min(last,position??(first+last)/2));
+}
+function setZoom(next,x,y){
+ if(!sheet.full)return;
+ const previous=scale;
+ const originX=preview.offsetLeft-diagram.scrollLeft;
+ const originY=preview.offsetTop-diagram.scrollTop;
+ x=visibleAnchor(x,originX,preview.width,diagram.clientWidth);
+ y=visibleAnchor(y,originY,preview.height,diagram.clientHeight);
+ const left=x-originX;
+ const top=y-originY;
+ scale=Math.max(minScale,Math.min(maxScale,next));
+ preview.width=Math.round(sheet.width*scale);
+ preview.height=Math.round(sheet.height*scale);
+ diagram.scrollLeft=left/previous*scale+preview.offsetLeft-x;
+ diagram.scrollTop=top/previous*scale+preview.offsetTop-y;
+ byId('zoom-level').textContent=Math.round(scale*100)+'%';
+ byId('zoom-out').disabled=scale<=minScale;
+ byId('zoom-in').disabled=scale>=maxScale;
+}
+function fitFull(){
+ setZoom(Math.min((diagram.clientWidth-padding)/sheet.width,(diagram.clientHeight-padding)/sheet.height),0,0);
+ diagram.scrollLeft=0;
+ diagram.scrollTop=0;
+}
+function show(){
+ sheet=sheets.find(item=>item.slug===pick.value);
+ scale=1;
+ diagram.classList.toggle('full',Boolean(sheet.full));
+ diagram.classList.toggle('fit',!sheet.full&&byId('fit').checked);
+ byId('small-controls').hidden=Boolean(sheet.full);
+ byId('full-controls').hidden=!sheet.full;
+ byId('open-full').disabled=Boolean(sheet.full);
+ const svg='svg/'+sheet.slug+'.svg';
+ byId('title').textContent=sheet.name;
+ byId('db').textContent=sheet.db;
+ byId('note').textContent=sheet.note;
+ byId('open-svg').href=svg;
+ byId('source').href='puml/'+sheet.slug+'.puml';
+ preview.alt='Diagrama ERD de '+sheet.name;
+ preview.width=sheet.width;
+ preview.height=sheet.height;
+ preview.src=svg;
+ diagram.scrollLeft=0;
+ diagram.scrollTop=0;
+ if(sheet.full)fitFull();
+ relations.hidden=sheet.refs.length===0;
+ relations.open=false;
+ byId('ref-count').textContent='Referencias lógicas de la lámina ('+sheet.refs.length+')';
+ references.replaceChildren();
+ for(const ref of sheet.refs){
+   const row=references.insertRow();
+   for(const value of [ref.column,ref.target]){
+     const code=document.createElement('code');
+     code.textContent=value;
+     row.insertCell().append(code);
+   }
+   row.insertCell().textContent=ref.description;
+ }
+}
+pick.addEventListener('change',show);
+byId('fit').addEventListener('change',event=>diagram.classList.toggle('fit',event.target.checked));
+byId('open-full').addEventListener('click',()=>{pick.value='14-erd-completo';show();byId('zoom-fit').focus();});
+byId('zoom-fit').addEventListener('click',fitFull);
+byId('zoom-out').addEventListener('click',()=>setZoom(scale/1.35));
+byId('zoom-in').addEventListener('click',()=>setZoom(scale*1.35));
+byId('zoom-actual').addEventListener('click',()=>setZoom(1));
+diagram.addEventListener('wheel',event=>{
+ if(!sheet.full||!event.ctrlKey)return;
+ event.preventDefault();
+ const rect=diagram.getBoundingClientRect();
+ setZoom(scale*(event.deltaY<0?1.2:1/1.2),event.clientX-rect.left,event.clientY-rect.top);
+},{passive:false});
+diagram.addEventListener('pointerdown',event=>{
+ if(!sheet.full||event.pointerType!=='mouse'||event.button!==0)return;
+ drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:diagram.scrollLeft,top:diagram.scrollTop};
+ diagram.setPointerCapture(event.pointerId);
+ diagram.classList.add('dragging');
+});
+diagram.addEventListener('pointermove',event=>{
+ if(drag?.id!==event.pointerId)return;
+ diagram.scrollLeft=drag.left+drag.x-event.clientX;
+ diagram.scrollTop=drag.top+drag.y-event.clientY;
+});
+diagram.addEventListener('lostpointercapture',()=>{
+ drag=null;
+ diagram.classList.remove('dragging');
+});
+show();
+</script>
+</body>
+</html>

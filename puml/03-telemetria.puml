@@ -1,0 +1,51 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Lecturas y telemetría
+entity "readings" as n_telemetry_readings {
+  * _id : string <<PK>>
+  --
+  * device_id : string <<REF>>
+  * unit_id : string <<REF>>
+  * boot_id : string
+  * sequence : int / long
+  * volume_ml : int / long
+  * interval_seconds : int / long
+  * measured_at : date
+  * received_at : date
+  * event : object
+}
+entity "readings.event" as n_telemetry_event {
+  * event_id : string
+  * status : pending / published
+    published_at : date / null
+}
+entity "erased_units (prevista)" as n_telemetry_erased_units {
+  * _id : string <<PK>>
+  --
+  * erased : boolean
+}
+n_telemetry_readings ||--|| n_telemetry_event : embebido
+n_telemetry_event -[hidden]right-> n_telemetry_erased_units
+legend bottom
+PK = ID único · REF = referencia lógica · ● = obligatorio
+El enlace embebido indica un subdocumento BSON.
+endlegend
+@enduml

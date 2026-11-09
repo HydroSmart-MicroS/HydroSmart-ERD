@@ -1,0 +1,668 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 42
+skinparam ranksep 80
+
+title HydroSmart MAIN · ERD completo
+skinparam packageStyle rectangle
+skinparam packageBorderColor #739290
+skinparam packageFontStyle bold
+skinparam packageFontSize 19
+package "Identidad · hs_identity" as db_identity #EAF5F1 {
+entity "account" as n_identity_account {
+  * id : text <<PK>>
+  --
+  * accountId : text
+  * providerId : text
+  * userId : text <<FK>>
+    accessToken : text
+    refreshToken : text
+    idToken : text
+    accessTokenExpiresAt : timestamptz
+    refreshTokenExpiresAt : timestamptz
+    scope : text
+    password : text
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+}
+entity "account_deletions" as n_identity_account_deletions {
+  * id : uuid <<PK>>
+  --
+    user_id : text <<UK, REF>>
+  * user_hash : text
+  * unit_ids : jsonb <<REF>>
+  * phase : integer
+  * attempts : integer
+  * requested_at : timestamptz
+  * next_attempt_at : timestamptz
+    completed_at : timestamptz
+    expires_at : timestamptz
+}
+entity "jwks" as n_identity_jwks {
+  * id : text <<PK>>
+  --
+  * publicKey : text
+  * privateKey : text
+  * createdAt : timestamptz
+    expiresAt : timestamptz
+    alg : text
+    crv : text
+}
+entity "outbox_events" as n_identity_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "session" as n_identity_session {
+  * id : text <<PK>>
+  --
+  * expiresAt : timestamptz
+  * token : text <<UK>>
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+    ipAddress : text
+    userAgent : text
+  * userId : text <<FK>>
+}
+entity "user" as n_identity_user {
+  * id : text <<PK>>
+  --
+  * name : text
+  * email : text <<UK>>
+  * emailVerified : boolean
+    image : text
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+    profileType : text
+    deletion_requested_at : timestamptz
+}
+entity "verification" as n_identity_verification {
+  * id : text <<PK>>
+  --
+  * identifier : text
+  * value : text
+  * expiresAt : timestamptz
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+}
+}
+package "Propiedades y medidores · hs_properties" as db_properties #EEF3FA {
+entity "devices" as n_properties_devices {
+  * id : uuid <<PK>>
+  --
+  * unit_id : uuid <<FK>>
+  * serial_number : varchar(120) <<UK>>
+  * name : varchar(120)
+  * category : varchar(80)
+  * state : varchar(20)
+  * registered_at : timestamptz
+    disabled_at : timestamptz
+}
+entity "flyway_schema_history" as n_properties_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "outbox_events" as n_properties_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "privacy_receipts" as n_properties_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "processed_events" as n_properties_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "properties" as n_properties_properties {
+  * id : uuid <<PK>>
+  --
+  * owner_user_id : text <<REF>>
+  * name : varchar(120)
+  * address : varchar(500)
+  * created_at : timestamptz
+}
+entity "tenancies" as n_properties_tenancies {
+  * id : uuid <<PK>>
+  --
+  * unit_id : uuid <<FK>>
+  * tenant_user_id : text <<REF>>
+  * starts_at : timestamptz
+    ends_at : timestamptz
+}
+entity "units" as n_properties_units {
+  * id : uuid <<PK>>
+  --
+  * property_id : uuid <<FK>>
+  * name : varchar(80)
+  * created_at : timestamptz
+}
+}
+package "Telemetría · hs_telemetry" as db_telemetry #F8F5E9 {
+entity "readings" as n_telemetry_readings {
+  * _id : string <<PK>>
+  --
+  * device_id : string <<REF>>
+  * unit_id : string <<REF>>
+  * boot_id : string
+  * sequence : int / long
+  * volume_ml : int / long
+  * interval_seconds : int / long
+  * measured_at : date
+  * received_at : date
+  * event : object
+}
+entity "readings.event" as n_telemetry_event {
+  * event_id : string
+  * status : pending / published
+    published_at : date / null
+}
+entity "erased_units (prevista)" as n_telemetry_erased_units {
+  * _id : string <<PK>>
+  --
+  * erased : boolean
+}
+}
+package "Analítica, tarifas y alertas · hs_analytics" as db_analytics #EAF5F1 {
+entity "alert_rules" as n_analytics_alert_rules {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+    unit_id : uuid <<REF>>
+  * kind : text
+  * threshold_liters : numeric(18,6)
+  * window_seconds : integer
+  * enabled : boolean
+  * settings : jsonb
+}
+entity "alert_samples" as n_analytics_alert_samples {
+  * reading_id : uuid <<PK, REF>>
+  --
+  * unit_id : uuid <<REF>>
+  * device_id : uuid <<REF>>
+  * liters : numeric(18,6)
+  * interval_seconds : integer
+  * measured_at : timestamptz
+}
+entity "alerts" as n_analytics_alerts {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * unit_id : uuid <<REF>>
+    device_id : uuid <<REF>>
+    rule_id : uuid <<FK>>
+  * kind : text
+  * status : text
+  * details : jsonb
+  * detected_at : timestamptz
+    resolved_at : timestamptz
+    fingerprint : text <<UK>>
+}
+entity "device_presence" as n_analytics_device_presence {
+  * device_id : uuid <<PK, REF>>
+  --
+  * unit_id : uuid <<REF>>
+  * last_seen_at : timestamptz
+  * offline_notified : boolean
+}
+entity "monitoring_inbox" as n_analytics_monitoring_inbox {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "outbox_events" as n_analytics_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "privacy_receipts" as n_analytics_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * expires_at : timestamptz
+}
+entity "privacy_units" as n_analytics_privacy_units {
+  * unit_hash : text <<PK>>
+}
+entity "processed_events" as n_analytics_processed_events {
+  * event_id : uuid <<PK, REF>>
+  --
+  * processed_at : timestamptz
+}
+entity "processed_readings" as n_analytics_processed_readings {
+  * reading_id : uuid <<PK, REF>>
+  --
+  * event_id : uuid <<UK, FK>>
+  * processed_at : timestamptz
+}
+entity "recommendations" as n_analytics_recommendations {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+    unit_id : uuid <<REF>>
+  * rule_code : text
+  * message : text
+  * generated_at : timestamptz
+}
+entity "savings_goals" as n_analytics_savings_goals {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * month : date
+    budget_amount : numeric(12,2)
+    target_liters : numeric(18,6)
+  * currency : character(3)
+    unit_id : uuid <<REF>>
+  * notified_80 : boolean
+}
+entity "schema_migrations" as n_analytics_schema_migrations {
+  * version : text <<PK>>
+  --
+  * checksum : text
+  * applied_at : timestamptz
+}
+entity "tariff_tiers" as n_analytics_tariff_tiers {
+  * tariff_id : uuid <<PK, FK>>
+  * from_m3 : numeric(12,3) <<PK>>
+  --
+    to_m3 : numeric(12,3)
+  * price_per_m3 : numeric(12,6)
+  * sewer_price_per_m3 : numeric(12,6)
+}
+entity "tariff_versions" as n_analytics_tariff_versions {
+  * id : uuid <<PK>>
+  --
+  * name : text
+  * currency : character(3)
+  * effective_from : date
+    effective_until : date
+  * fixed_charge : numeric(12,2)
+  * category : text
+    owner_user_id : text <<REF>>
+  * tax_rate : numeric(5,4)
+    source_url : text
+    source_date : date
+}
+entity "unit_daily_consumption" as n_analytics_unit_daily_consumption {
+  * unit_id : uuid <<PK, REF>>
+  * local_date : date <<PK>>
+  --
+  * timezone : text
+  * liters : numeric(18,6)
+  * updated_at : timestamptz
+}
+entity "unit_tariff_periods" as n_analytics_unit_tariff_periods {
+  * unit_id : uuid <<PK, REF>>
+  * effective_month : date <<PK>>
+  --
+  * tariff_id : uuid <<FK>>
+  * legacy_snapshot : boolean
+  * recorded_at : timestamptz
+}
+entity "unit_tariffs" as n_analytics_unit_tariffs {
+  * unit_id : uuid <<PK, REF>>
+  --
+  * tariff_id : uuid <<FK>>
+}
+}
+package "Reportes · hs_reports" as db_reports #EEF3FA {
+entity "flyway_schema_history" as n_reports_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "outbox_events" as n_reports_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "privacy_receipts" as n_reports_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "processed_events" as n_reports_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "report_artifacts" as n_reports_report_artifacts {
+  * report_id : uuid <<PK, FK>>
+  --
+  * content : bytea
+  * content_type : text
+}
+entity "report_jobs" as n_reports_report_jobs {
+  * id : uuid <<PK>>
+  --
+  * requested_by_user_id : text <<REF>>
+    unit_id : uuid <<REF>>
+  * period_start : timestamptz
+  * period_end : timestamptz
+  * format : varchar(4)
+  * status : varchar(12)
+    storage_key : text
+    error_code : text
+  * requested_at : timestamptz
+    completed_at : timestamptz
+    request_event_id : uuid <<REF>>
+    last_error : varchar(300)
+}
+}
+package "Notificaciones · hs_notifications" as db_notifications #F8F5E9 {
+entity "flyway_schema_history" as n_notifications_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "notification_preferences" as n_notifications_notification_preferences {
+  * user_id : text <<PK, REF>>
+  --
+  * high_consumption_enabled : boolean
+  * leak_alerts_enabled : boolean
+  * summaries_enabled : boolean
+  * timezone : text
+    quiet_start : time
+    quiet_end : time
+  * updated_at : timestamptz
+  * email_enabled : boolean
+  * in_app_enabled : boolean
+  * goal_enabled : boolean
+}
+entity "notifications" as n_notifications_notifications {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * source_event_id : uuid
+  * channel : text
+  * title : text
+  * body : text
+  * status : text
+  * created_at : timestamptz
+    read_at : timestamptz
+    sent_at : timestamptz
+  * kind : text
+  * attempts : integer
+    last_error : text
+    provider_message_id : text
+  * data : jsonb
+}
+entity "outbox_events" as n_notifications_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "privacy_receipts" as n_notifications_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "processed_events" as n_notifications_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "push_deliveries" as n_notifications_push_deliveries {
+  * notification_id : uuid <<PK, FK>>
+  * token_id : uuid <<PK, FK>>
+  --
+  * delivered_at : timestamptz
+}
+entity "push_tokens" as n_notifications_push_tokens {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * token : text <<UK>>
+  * created_at : timestamptz
+    revoked_at : timestamptz
+    p256dh : text
+    auth_secret : text
+}
+}
+package "Planes y pagos · hs_billing" as db_billing #EAF5F1 {
+entity "anonymous_payment_archive" as n_billing_anonymous_payment_archive {
+  * id : uuid <<PK>>
+  --
+  * kind : text
+    plan_code : text
+    invoice_month : date
+  * amount_minor : integer
+  * currency : text
+    paid_date : date
+  * expires_at : timestamptz
+}
+entity "billing_customers" as n_billing_billing_customers {
+  * user_id : text <<PK, REF>>
+  --
+  * stripe_customer_id : text <<UK>>
+}
+entity "flyway_schema_history" as n_billing_flyway_schema_history {
+  * installed_rank : integer <<PK>>
+  --
+    version : varchar(50)
+  * description : varchar(200)
+  * type : varchar(20)
+  * script : varchar(1000)
+    checksum : integer
+  * installed_by : varchar(100)
+  * installed_on : timestamp
+  * execution_time : integer
+  * success : boolean
+}
+entity "memberships" as n_billing_memberships {
+  * user_id : text <<PK, REF>>
+  --
+  * plan_code : text <<FK>>
+  * paid_through : timestamptz
+  * last_payment_id : uuid <<FK>>
+  * updated_at : timestamptz
+  * cancel_at_period_end : boolean
+    cancellation_requested_at : timestamptz
+}
+entity "outbox_events" as n_billing_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "payment_orders" as n_billing_payment_orders {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<REF>>
+  * kind : text
+    plan_code : text <<FK>>
+    unit_id : uuid <<REF>>
+    invoice_month : date
+  * amount_minor : integer
+  * currency : text
+  * status : text
+    provider_session_id : text <<UK>>
+    checkout_url : text
+    verification_token : text
+  * created_at : timestamptz
+    paid_at : timestamptz
+  * next_check_at : timestamptz
+    cancelled_at : timestamptz
+}
+entity "plans" as n_billing_plans {
+  * code : text <<PK>>
+  --
+  * currency : character(3)
+  * min_price_minor : integer
+  * max_price_minor : integer
+    configured_price_minor : integer
+    billing_interval : text
+    stripe_price_id : text <<UK>>
+  * device_limit : integer
+}
+entity "privacy_receipts" as n_billing_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "processed_events" as n_billing_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "stripe_webhook_events" as n_billing_stripe_webhook_events {
+  * stripe_event_id : text <<PK>>
+  --
+  * event_type : text
+  * received_at : timestamptz
+    processed_at : timestamptz
+}
+entity "subscriptions" as n_billing_subscriptions {
+  * id : uuid <<PK>>
+  --
+  * user_id : text <<FK>>
+  * plan_code : text <<FK>>
+  * stripe_subscription_id : text <<UK>>
+  * status : text
+    current_period_end : timestamptz
+  * updated_at : timestamptz
+}
+}
+n_identity_user ||--o{ n_identity_account : FK userId
+n_identity_user ||--o{ n_identity_session : FK userId
+n_properties_units ||--o{ n_properties_devices : FK unit_id
+n_properties_units ||--o{ n_properties_tenancies : FK unit_id
+n_properties_properties ||--o{ n_properties_units : FK property_id
+n_analytics_alert_rules |o--o{ n_analytics_alerts : FK rule_id
+n_analytics_processed_events ||--o| n_analytics_processed_readings : FK event_id
+n_analytics_tariff_versions ||--o{ n_analytics_tariff_tiers : FK tariff_id
+n_analytics_tariff_versions ||--o{ n_analytics_unit_tariff_periods : FK tariff_id
+n_analytics_tariff_versions ||--o{ n_analytics_unit_tariffs : FK tariff_id
+n_reports_report_jobs ||--o| n_reports_report_artifacts : FK report_id
+n_notifications_notifications ||--o{ n_notifications_push_deliveries : FK notification_id
+n_notifications_push_tokens ||--o{ n_notifications_push_deliveries : FK token_id
+n_billing_payment_orders ||--o{ n_billing_memberships : FK last_payment_id
+n_billing_plans ||--o{ n_billing_memberships : FK plan_code
+n_billing_plans |o--o{ n_billing_payment_orders : FK plan_code
+n_billing_plans ||--o{ n_billing_subscriptions : FK plan_code
+n_billing_billing_customers ||--o{ n_billing_subscriptions : FK user_id
+n_identity_user ..> n_properties_properties : REF owner_user_id
+n_identity_user ..> n_properties_tenancies : REF tenant_user_id
+n_properties_units ..> n_telemetry_readings : REF unit_id
+n_properties_devices ..> n_telemetry_readings : REF device_id
+n_identity_user ..> n_analytics_savings_goals : REF user_id
+n_identity_user ..> n_analytics_alert_rules : REF user_id
+n_properties_units ..> n_analytics_alert_rules : REF unit_id
+n_identity_user ..> n_analytics_alerts : REF user_id
+n_properties_units ..> n_analytics_alerts : REF unit_id
+n_properties_devices ..> n_analytics_alerts : REF device_id
+n_properties_units ..> n_analytics_unit_daily_consumption : REF unit_id
+n_identity_user ..> n_analytics_recommendations : REF user_id
+n_properties_units ..> n_analytics_recommendations : REF unit_id
+n_identity_user ..> n_reports_report_jobs : REF requested_by_user_id
+n_properties_units ..> n_reports_report_jobs : REF unit_id
+n_identity_user ..> n_notifications_notification_preferences : REF user_id
+n_identity_user ..> n_notifications_push_tokens : REF user_id
+n_identity_user ..> n_notifications_notifications : REF user_id
+n_identity_user ..> n_billing_billing_customers : REF user_id
+n_telemetry_readings ..> n_analytics_processed_readings : REF reading_id
+n_properties_units ..> n_analytics_unit_tariffs : REF unit_id
+n_identity_user ..> n_analytics_tariff_versions : REF owner_user_id
+n_identity_user ..> n_identity_outbox_events : REF aggregate_id
+n_identity_user ..> n_billing_memberships : REF user_id
+n_identity_user ..> n_billing_payment_orders : REF user_id
+n_properties_units ..> n_billing_payment_orders : REF unit_id
+n_properties_units ..> n_analytics_savings_goals : REF unit_id
+n_properties_units ..> n_analytics_alert_samples : REF unit_id
+n_properties_devices ..> n_analytics_alert_samples : REF device_id
+n_properties_units ..> n_analytics_unit_tariff_periods : REF unit_id
+n_properties_devices ..> n_analytics_device_presence : REF device_id
+n_properties_units ..> n_analytics_device_presence : REF unit_id
+n_identity_user ..> n_identity_account_deletions : REF user_id
+n_telemetry_readings ..> n_analytics_alert_samples : REF reading_id
+n_telemetry_event ..> n_analytics_processed_events : REF event_id
+n_reports_outbox_events ..> n_reports_report_jobs : REF request_event_id
+n_reports_report_jobs ..> n_reports_outbox_events : REF aggregate_id
+n_identity_user ..> n_billing_outbox_events : REF aggregate_id
+n_identity_user ..> n_notifications_outbox_events : REF aggregate_id
+n_properties_units ..> n_identity_account_deletions : REF unit_ids (lista)
+n_properties_units ..> n_analytics_outbox_events : REF aggregate_id (según evento)
+n_identity_user ..> n_analytics_outbox_events : REF aggregate_id (según evento)
+n_telemetry_readings *-- n_telemetry_event : BSON embebido
+legend bottom
+PK = primaria · FK = foránea real · UK = unicidad · REF = vínculo lógico
+● = campo obligatorio · Flechas REF desde origen del ID hacia quien lo guarda
+El enlace BSON representa un subdocumento. erased_units es una colección prevista.
+endlegend
+@enduml

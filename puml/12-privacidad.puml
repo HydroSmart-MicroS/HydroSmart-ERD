@@ -1,0 +1,92 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Privacidad y eliminación
+entity "hs_identity.account_deletions" as n_identity_account_deletions {
+  * id : uuid <<PK>>
+  --
+    user_id : text <<UK, REF>>
+  * user_hash : text
+  * unit_ids : jsonb <<REF>>
+  * phase : integer
+  * attempts : integer
+  * requested_at : timestamptz
+  * next_attempt_at : timestamptz
+    completed_at : timestamptz
+    expires_at : timestamptz
+}
+entity "hs_properties.privacy_receipts" as n_properties_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "hs_analytics.privacy_receipts" as n_analytics_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * expires_at : timestamptz
+}
+entity "hs_analytics.privacy_units" as n_analytics_privacy_units {
+  * unit_hash : text <<PK>>
+}
+entity "hs_reports.privacy_receipts" as n_reports_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "hs_notifications.privacy_receipts" as n_notifications_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "hs_billing.privacy_receipts" as n_billing_privacy_receipts {
+  * user_hash : text <<PK>>
+  --
+  * completed : boolean
+  * expires_at : timestamptz
+}
+entity "hs_billing.anonymous_payment_archive" as n_billing_anonymous_payment_archive {
+  * id : uuid <<PK>>
+  --
+  * kind : text
+    plan_code : text
+    invoice_month : date
+  * amount_minor : integer
+  * currency : text
+    paid_date : date
+  * expires_at : timestamptz
+}
+n_identity_account_deletions -[hidden]right-> n_billing_anonymous_payment_archive
+n_properties_privacy_receipts -[hidden]right-> n_analytics_privacy_receipts
+n_analytics_privacy_receipts -[hidden]right-> n_analytics_privacy_units
+n_reports_privacy_receipts -[hidden]right-> n_notifications_privacy_receipts
+n_notifications_privacy_receipts -[hidden]right-> n_billing_privacy_receipts
+n_identity_account_deletions -[hidden]down-> n_properties_privacy_receipts
+n_billing_anonymous_payment_archive -[hidden]down-> n_analytics_privacy_receipts
+n_properties_privacy_receipts -[hidden]down-> n_reports_privacy_receipts
+n_analytics_privacy_receipts -[hidden]down-> n_notifications_privacy_receipts
+n_analytics_privacy_units -[hidden]down-> n_billing_privacy_receipts
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

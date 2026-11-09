@@ -1,0 +1,91 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Identidad y acceso
+entity "user" as n_identity_user {
+  * id : text <<PK>>
+  --
+  * name : text
+  * email : text <<UK>>
+  * emailVerified : boolean
+    image : text
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+    profileType : text
+    deletion_requested_at : timestamptz
+}
+entity "account" as n_identity_account {
+  * id : text <<PK>>
+  --
+  * accountId : text
+  * providerId : text
+  * userId : text <<FK>>
+    accessToken : text
+    refreshToken : text
+    idToken : text
+    accessTokenExpiresAt : timestamptz
+    refreshTokenExpiresAt : timestamptz
+    scope : text
+    password : text
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+}
+entity "session" as n_identity_session {
+  * id : text <<PK>>
+  --
+  * expiresAt : timestamptz
+  * token : text <<UK>>
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+    ipAddress : text
+    userAgent : text
+  * userId : text <<FK>>
+}
+entity "verification" as n_identity_verification {
+  * id : text <<PK>>
+  --
+  * identifier : text
+  * value : text
+  * expiresAt : timestamptz
+  * createdAt : timestamptz
+  * updatedAt : timestamptz
+}
+entity "jwks" as n_identity_jwks {
+  * id : text <<PK>>
+  --
+  * publicKey : text
+  * privateKey : text
+  * createdAt : timestamptz
+    expiresAt : timestamptz
+    alg : text
+    crv : text
+}
+n_identity_user ||--o{ n_identity_account : userId
+n_identity_user ||--o{ n_identity_session : userId
+n_identity_user -[hidden]right-> n_identity_verification
+n_identity_verification -[hidden]right-> n_identity_jwks
+n_identity_account -[hidden]right-> n_identity_session
+n_identity_user -[hidden]down-> n_identity_account
+n_identity_verification -[hidden]down-> n_identity_session
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

@@ -1,0 +1,61 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Reportes y archivos
+entity "report_jobs" as n_reports_report_jobs {
+  * id : uuid <<PK>>
+  --
+  * requested_by_user_id : text <<REF>>
+    unit_id : uuid <<REF>>
+  * period_start : timestamptz
+  * period_end : timestamptz
+  * format : varchar(4)
+  * status : varchar(12)
+    storage_key : text
+    error_code : text
+  * requested_at : timestamptz
+    completed_at : timestamptz
+    request_event_id : uuid <<REF>>
+    last_error : varchar(300)
+}
+entity "report_artifacts" as n_reports_report_artifacts {
+  * report_id : uuid <<PK, FK>>
+  --
+  * content : bytea
+  * content_type : text
+}
+entity "outbox_events" as n_reports_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+n_reports_report_jobs ||--o| n_reports_report_artifacts : report_id
+
+n_reports_outbox_events |o..o{ n_reports_report_jobs : REF request_event_id
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

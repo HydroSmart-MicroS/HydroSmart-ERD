@@ -1,0 +1,116 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Eventos y deduplicación
+entity "hs_identity.outbox_events" as n_identity_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "hs_properties.outbox_events" as n_properties_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "hs_properties.processed_events" as n_properties_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "hs_analytics.outbox_events" as n_analytics_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "hs_reports.processed_events" as n_reports_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "hs_notifications.outbox_events" as n_notifications_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "hs_notifications.processed_events" as n_notifications_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "hs_billing.outbox_events" as n_billing_outbox_events {
+  * event_id : uuid <<PK>>
+  --
+  * event_type : text
+  * aggregate_id : text <<REF>>
+  * payload : jsonb
+  * occurred_at : timestamptz
+    published_at : timestamptz
+  * attempts : integer
+}
+entity "hs_billing.processed_events" as n_billing_processed_events {
+  * event_id : uuid <<PK>>
+  --
+  * processed_at : timestamptz
+}
+entity "hs_billing.stripe_webhook_events" as n_billing_stripe_webhook_events {
+  * stripe_event_id : text <<PK>>
+  --
+  * event_type : text
+  * received_at : timestamptz
+    processed_at : timestamptz
+}
+n_identity_outbox_events -[hidden]right-> n_properties_outbox_events
+n_properties_outbox_events -[hidden]right-> n_analytics_outbox_events
+n_notifications_outbox_events -[hidden]right-> n_billing_outbox_events
+n_billing_outbox_events -[hidden]right-> n_properties_processed_events
+n_reports_processed_events -[hidden]right-> n_notifications_processed_events
+n_notifications_processed_events -[hidden]right-> n_billing_processed_events
+n_identity_outbox_events -[hidden]down-> n_notifications_outbox_events
+n_properties_outbox_events -[hidden]down-> n_billing_outbox_events
+n_analytics_outbox_events -[hidden]down-> n_properties_processed_events
+n_notifications_outbox_events -[hidden]down-> n_reports_processed_events
+n_billing_outbox_events -[hidden]down-> n_notifications_processed_events
+n_properties_processed_events -[hidden]down-> n_billing_processed_events
+n_reports_processed_events -[hidden]down-> n_billing_stripe_webhook_events
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

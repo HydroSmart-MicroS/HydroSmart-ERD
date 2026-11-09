@@ -1,0 +1,64 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Propiedades, unidades y medidores
+entity "properties" as n_properties_properties {
+  * id : uuid <<PK>>
+  --
+  * owner_user_id : text <<REF>>
+  * name : varchar(120)
+  * address : varchar(500)
+  * created_at : timestamptz
+}
+entity "units" as n_properties_units {
+  * id : uuid <<PK>>
+  --
+  * property_id : uuid <<FK>>
+  * name : varchar(80)
+  * created_at : timestamptz
+}
+entity "devices" as n_properties_devices {
+  * id : uuid <<PK>>
+  --
+  * unit_id : uuid <<FK>>
+  * serial_number : varchar(120) <<UK>>
+  * name : varchar(120)
+  * category : varchar(80)
+  * state : varchar(20)
+  * registered_at : timestamptz
+    disabled_at : timestamptz
+}
+entity "tenancies" as n_properties_tenancies {
+  * id : uuid <<PK>>
+  --
+  * unit_id : uuid <<FK>>
+  * tenant_user_id : text <<REF>>
+  * starts_at : timestamptz
+    ends_at : timestamptz
+}
+n_properties_properties ||--o{ n_properties_units : property_id
+n_properties_units ||--o{ n_properties_devices : unit_id
+n_properties_units ||--o{ n_properties_tenancies : unit_id
+
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml

@@ -1,0 +1,65 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+title Tarifas, tramos y vigencias
+entity "tariff_versions" as n_analytics_tariff_versions {
+  * id : uuid <<PK>>
+  --
+  * name : text
+  * currency : character(3)
+  * effective_from : date
+    effective_until : date
+  * fixed_charge : numeric(12,2)
+  * category : text
+    owner_user_id : text <<REF>>
+  * tax_rate : numeric(5,4)
+    source_url : text
+    source_date : date
+}
+entity "tariff_tiers" as n_analytics_tariff_tiers {
+  * tariff_id : uuid <<PK, FK>>
+  * from_m3 : numeric(12,3) <<PK>>
+  --
+    to_m3 : numeric(12,3)
+  * price_per_m3 : numeric(12,6)
+  * sewer_price_per_m3 : numeric(12,6)
+}
+entity "unit_tariffs" as n_analytics_unit_tariffs {
+  * unit_id : uuid <<PK, REF>>
+  --
+  * tariff_id : uuid <<FK>>
+}
+entity "unit_tariff_periods" as n_analytics_unit_tariff_periods {
+  * unit_id : uuid <<PK, REF>>
+  * effective_month : date <<PK>>
+  --
+  * tariff_id : uuid <<FK>>
+  * legacy_snapshot : boolean
+  * recorded_at : timestamptz
+}
+n_analytics_tariff_versions ||--o{ n_analytics_tariff_tiers : tariff_id
+n_analytics_tariff_versions ||--o{ n_analytics_unit_tariffs : tariff_id
+n_analytics_tariff_versions ||--o{ n_analytics_unit_tariff_periods : tariff_id
+
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+endlegend
+@enduml
