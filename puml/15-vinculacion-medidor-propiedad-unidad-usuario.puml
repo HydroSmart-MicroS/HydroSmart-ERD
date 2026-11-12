@@ -1,0 +1,72 @@
+@startuml
+hide circle
+hide methods
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam classFontSize 15
+skinparam classFontStyle bold
+skinparam classAttributeFontSize 14
+skinparam classBorderColor #537278
+skinparam classBackgroundColor #F5FBFA
+skinparam classFontColor #153A3E
+skinparam classAttributeFontColor #183A3E
+skinparam ArrowColor #356A70
+skinparam ArrowFontColor #204B51
+skinparam ArrowFontSize 13
+skinparam linetype ortho
+skinparam nodesep 26
+skinparam ranksep 54
+
+title Vinculación medidor–propiedad–unidad–usuario
+
+package "hs_identity" #EEF3FA {
+  entity "user · Usuario" as users {
+    * id : text <<PK>>
+    --
+    * name : text
+  }
+}
+
+package "hs_properties" #EEF3FA {
+  entity "properties · Propiedad" as properties {
+    * id : uuid <<PK>>
+    --
+    * owner_user_id : text <<REF>>
+    * name : varchar(120)
+  }
+  entity "units · Unidad" as units {
+    * id : uuid <<PK>>
+    --
+    * property_id : uuid <<FK>>
+    * name : varchar(80)
+  }
+  entity "devices · Medidor" as devices {
+    * id : uuid <<PK>>
+    --
+    * unit_id : uuid <<FK>>
+    * serial_number : varchar(120) <<UK>>
+  }
+  entity "tenancies · Alquiler" as tenancies {
+    * id : uuid <<PK>>
+    --
+    * unit_id : uuid <<FK>>
+    * tenant_user_id : text <<REF>>
+    * starts_at : timestamptz
+      ends_at : timestamptz
+  }
+}
+
+users ..> properties : Propietario
+users ..> tenancies : Inquilino
+properties ||--o{ units : property_id
+units ||--o{ devices : unit_id
+units ||--o{ tenancies : unit_id
+
+legend bottom
+PK = clave primaria · FK = clave foránea · UK = clave única · REF = referencia lógica
+● = campo obligatorio · Enlaces continuos = FK · Enlaces punteados = REF
+Cada unidad admite como máximo un alquiler abierto (ends_at IS NULL).
+endlegend
+@enduml
